@@ -1,0 +1,32 @@
+// AIRTABLE BUTTON INTEGROMAT TRIGGER TEMPLATE
+// @maker_zo_
+
+// Webhook URL
+let webhook = 'YOURWEBHOOKADDRESS'
+
+// Airtable Script Button Text
+let actionDescription = 'Sending Images to Process'
+
+// Table to send data from
+let tableName = 'Animal Tracker'
+
+// Fields to bind and send
+let fieldsToSend = ['Area','Created']
+
+
+// !--------------------! //
+
+let table = base.getTable(tableName);
+let record = await input.recordAsync(actionDescription, table);
+let queryParams = `/?id=${record.id}`
+if(fieldsToSend.length > 0){
+    function buildParams(fieldName) {
+        let fieldValue = record.getCellValueAsString(fieldName)
+        queryParams += `&${encodeURIComponent(fieldName)}=${encodeURIComponent(fieldValue)}`
+    }
+    fieldsToSend.forEach(buildParams);
+}
+const returnedPayload = await fetch(`${webhook}${queryParams}`);
+var payloadResponse = await returnedPayload.json()
+let results = payloadResponse.result;
+output.text(results)
